@@ -1,3 +1,5 @@
+* * * * * echo "Running..."
+* * * * * curl http://google.com
 * * * * * rails test_tasks
 
 # An empty line is required at the end of this file for a valid cron file.
