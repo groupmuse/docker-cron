@@ -1,5 +1,3 @@
-* * * * * echo "Running..."
-* * * * * curl http://google.com
-* * * * * rails test_tasks
+* * * * * curl https://www.groupmuse.com/cron/test?api_key=aadf04e0b039c26611719009824e79ab
 
 # An empty line is required at the end of this file for a valid cron file.
