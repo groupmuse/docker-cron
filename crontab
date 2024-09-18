@@ -1,3 +1,5 @@
-0 * * * * curl -k https://www.groupmuse.com/cron/test?api_key=$CRON_API_KEY
+0,10,20,30,40,50 * * * * curl -k https://www.groupmuse.com/cron/ten_minutely?api_key=$CRON_API_KEY
+0 * * * * curl -k https://www.groupmuse.com/cron/hourly?api_key=$CRON_API_KEY
+0 18 * * * curl -k https://www.groupmuse.com/cron/daily?api_key=$CRON_API_KEY
 
 # An empty line is required at the end of this file for a valid cron file.
