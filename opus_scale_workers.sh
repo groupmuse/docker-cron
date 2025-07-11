@@ -5,6 +5,7 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 LOCK_FILE="/tmp/scale_workers.lock"
 LAST_SCALE_FILE="/tmp/last_scale_time"
 MIN_SCALE_INTERVAL=300  # 5 minutes in seconds
+TEMP_DIR=$(mktemp -d)
 
 # Logging function
 log() {
@@ -14,7 +15,7 @@ log() {
 # Cleanup function
 cleanup() {
     rm -f "$LOCK_FILE"
-    rm -rf "$TEMP_DIR"
+    [[ -n "$TEMP_DIR" ]] && rm -rf "$TEMP_DIR"
 }
 trap cleanup EXIT
 
@@ -53,7 +54,6 @@ DIGITALOCEAN_APP_ID="${DIGITALOCEAN_APP_ID:-fe1dbd39-84b1-41f1-9ca2-25e974b691ff
 DIGITALOCEAN_APP_URL="https://api.digitalocean.com/v2/apps/${DIGITALOCEAN_APP_ID}"
 QUEUE_API_URL="https://www.groupmuse.com/cron/queue_size?api_key=${CRON_API_KEY}"
 YAML_FILE="appspec.yaml"
-TEMP_DIR=$(mktemp -d)
 
 # Step 1: GET the full app spec
 log "Fetching full app spec from DigitalOcean..."
