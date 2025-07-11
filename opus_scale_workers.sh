@@ -55,8 +55,10 @@ DIGITALOCEAN_APP_URL="https://api.digitalocean.com/v2/apps/${DIGITALOCEAN_APP_ID
 QUEUE_API_URL="https://www.groupmuse.com/cron/queue_size?api_key=${CRON_API_KEY}"
 YAML_FILE="appspec.yaml"
 
+log "Starting worker scaling script..."
+
 # Step 1: GET the full app spec
-log "Fetching full app spec from DigitalOcean..."
+# log "Fetching full app spec from DigitalOcean..."
 if ! curl -sf -X GET "$DIGITALOCEAN_APP_URL" \
   -H "Authorization: Bearer $DIGITALOCEAN_API_TOKEN" \
   -H "Content-Type: application/yaml" \
@@ -66,7 +68,7 @@ if ! curl -sf -X GET "$DIGITALOCEAN_APP_URL" \
 fi
 
 # Step 2: Extract app.spec
-log "Extracting app.spec..."
+# log "Extracting app.spec..."
 if ! yq e '{ "spec": .app.spec }' "$TEMP_DIR/fullspec.yaml" > "$TEMP_DIR/$YAML_FILE"; then
     log "ERROR: Failed to extract app spec"
     exit 1
@@ -81,7 +83,7 @@ if [[ "$autoscaling_enabled" == "true" ]]; then
 fi
 
 # Step 3: Get the current queue length
-log "Fetching queue length..."
+# log "Fetching queue length..."
 queue_response=$(curl -sf "$QUEUE_API_URL" || echo '{"pending": 0}')
 queue_length=$(echo "$queue_response" | jq -r '.pending // 0')
 
@@ -127,22 +129,19 @@ else
     new_worker_count=10
 fi
 
-# Apply scale DOWN thresholds (conservative) to prevent flapping
+# Scale DOWN to 1 worker if queue is low (less than 10 jobs)
+# Otherwise, keep current worker count!
 if [[ "$new_worker_count" -lt "$current_worker_count" ]]; then
-    case $current_worker_count in
-        10) [[ $queue_length -lt 20000 ]] && new_worker_count=9 || new_worker_count=$current_worker_count ;;
-        9)  [[ $queue_length -lt 15000 ]] && new_worker_count=8 || new_worker_count=$current_worker_count ;;
-        8)  [[ $queue_length -lt 10000 ]] && new_worker_count=7 || new_worker_count=$current_worker_count ;;
-        7)  [[ $queue_length -lt 7000 ]] && new_worker_count=6 || new_worker_count=$current_worker_count ;;
-        6)  [[ $queue_length -lt 4000 ]] && new_worker_count=5 || new_worker_count=$current_worker_count ;;
-        5)  [[ $queue_length -lt 2500 ]] && new_worker_count=4 || new_worker_count=$current_worker_count ;;
-        4)  [[ $queue_length -lt 1200 ]] && new_worker_count=3 || new_worker_count=$current_worker_count ;;
-        3)  [[ $queue_length -lt 400 ]] && new_worker_count=2 || new_worker_count=$current_worker_count ;;
-        2)  [[ $queue_length -lt 50 ]] && new_worker_count=1 || new_worker_count=$current_worker_count ;;
-    esac
+    # Only downscale if queue has fewer than 10 jobs
+    if [[ $queue_length -lt 10 ]]; then
+        new_worker_count=1
+    else
+        # Keep current worker count if queue is 10 or more
+        new_worker_count=$current_worker_count
+    fi
 fi
 
-log "Target new worker count is $new_worker_count (based on queue length $queue_length)."
+log "Target new worker count is $new_worker_count (based on queue length $queue_length and current worker count $current_worker_count)."
 
 # Check if scaling is needed
 if [[ "$new_worker_count" -eq "$current_worker_count" ]]; then
