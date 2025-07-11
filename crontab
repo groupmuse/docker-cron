@@ -1,6 +1,6 @@
 0,10,20,30,40,50 * * * * curl https://www.groupmuse.com/cron/ten_minutely?api_key=$CRON_API_KEY
 0 * * * * curl https://www.groupmuse.com/cron/hourly?api_key=$CRON_API_KEY
 0 18 * * * curl https://www.groupmuse.com/cron/daily?api_key=$CRON_API_KEY
-*/3 * * * * ./opus_scale_workers.sh >> /tmp/scale_workers.log 2>&1
+*/3 * * * * /opus_scale_workers.sh >> /tmp/scale_workers.log 2>&1
 
 # An empty line is required at the end of this file for a valid cron file.
