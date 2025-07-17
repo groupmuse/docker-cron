@@ -109,21 +109,21 @@ log "Current worker count is $current_worker_count."
 # Scale UP thresholds (aggressive)
 if (( queue_length <= 100 )); then
     new_worker_count=1
-elif (( queue_length <= 500 )); then
+elif (( queue_length <= 250 )); then
     new_worker_count=2
-elif (( queue_length <= 1500 )); then
+elif (( queue_length <= 500 )); then
     new_worker_count=3
-elif (( queue_length <= 3000 )); then
+elif (( queue_length <= 1000 )); then
     new_worker_count=4
-elif (( queue_length <= 5000 )); then
+elif (( queue_length <= 2000 )); then
     new_worker_count=5
-elif (( queue_length <= 8000 )); then
+elif (( queue_length <= 3000 )); then
     new_worker_count=6
-elif (( queue_length <= 12000 )); then
+elif (( queue_length <= 5000 )); then
     new_worker_count=7
-elif (( queue_length <= 18000 )); then
+elif (( queue_length <= 7500 )); then
     new_worker_count=8
-elif (( queue_length <= 25000 )); then
+elif (( queue_length <= 10000 )); then
     new_worker_count=9
 else
     new_worker_count=10
